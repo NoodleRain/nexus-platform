@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Flask
+instance/
+.webassets-cache
+backend/logs/
+backend/uploads/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+
+# Environment
+.env
+.env.local
+.env.production
+*.env
+
+# Docker
+docker/secrets/
+
+# SSL certs
+nginx/ssl/
+*.pem
+*.key
+*.crt
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Secrets
+secrets/
