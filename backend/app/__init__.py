@@ -35,7 +35,7 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
+    CORS(app, origins=app.config["CORS_ORIGINS"], supports_credentials=True)
     socketio.init_app(app, cors_allowed_origins=app.config["CORS_ORIGINS"], async_mode="threading")
 
     from app.api.auth import auth_bp
