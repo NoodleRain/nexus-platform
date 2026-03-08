@@ -1,3 +1,10 @@
+import logging
+import os
+import sys
+
+# Fix path so config module can be found
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -6,12 +13,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import logging
-import os
-import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from logging.handlers import RotatingFileHandler
-import os
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -23,14 +25,12 @@ limiter = Limiter(key_func=get_remote_address)
 def create_app(config_name=None):
     app = Flask(__name__)
 
-    # Load config
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")
 
     from config.settings import config
     app.config.from_object(config[config_name])
 
-    # Init extensions
     db.init_app(app)
     jwt.init_app(app)
     mail.init_app(app)
@@ -38,15 +38,11 @@ def create_app(config_name=None):
     CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
     socketio.init_app(app, cors_allowed_origins=app.config["CORS_ORIGINS"], async_mode="threading")
 
-    # Register blueprints
     from app.api.auth import auth_bp
     from app.api.users import users_bp
     from app.api.messages import messages_bp
     from app.api.admin import admin_bp
-    from app.api.content import content_bp
-    from app.api.uploads import uploads_bp
-    from app.api.notifications import notifications_bp
-    from app.api.search import search_bp
+    from app.api.content import content_bp, uploads_bp, notifications_bp, search_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(users_bp, url_prefix="/api/users")
@@ -57,7 +53,11 @@ def create_app(config_name=None):
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
     app.register_blueprint(search_bp, url_prefix="/api/search")
 
-    # Setup logging
+    # Health check
+    @app.route("/api/health")
+    def health():
+        return {"status": "healthy", "version": "1.0.0"}
+
     if not app.debug:
         if not os.path.exists("logs"):
             os.mkdir("logs")
@@ -70,7 +70,6 @@ def create_app(config_name=None):
         app.logger.setLevel(logging.INFO)
         app.logger.info("Nexus Platform startup")
 
-    # JWT callbacks
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):
         from app.models.session import TokenBlocklist
