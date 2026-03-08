@@ -3,7 +3,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 // ─── AUTH CONTEXT ────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem("access_token");
