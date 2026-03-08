@@ -583,18 +583,17 @@ function AuthPage({ onLogin }) {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [registered, setRegistered] = useState(null); // holds { username, email } after success
 
   const switchMode = (m) => {
     setMode(m);
     setError("");
-    setSuccess("");
+    setRegistered(null);
     setForm({ username: "", email: "", password: "" });
   };
 
   const submit = async () => {
     setError("");
-    setSuccess("");
     setLoading(true);
 
     const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
@@ -617,11 +616,9 @@ function AuthPage({ onLogin }) {
         localStorage.setItem("refresh_token", data.refresh_token);
         onLogin(data.user);
       } else {
-        setSuccess("Account created successfully! You can now sign in.");
+        // Show full success screen
+        setRegistered({ username: form.username, email: form.email });
         setForm({ username: "", email: "", password: "" });
-        setTimeout(() => {
-          switchMode("login");
-        }, 2000);
       }
     } catch (err) {
       setLoading(false);
@@ -629,10 +626,56 @@ function AuthPage({ onLogin }) {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") submit();
-  };
+  const handleKeyDown = (e) => { if (e.key === "Enter") submit(); };
 
+  // ── Full-screen success state ──────────────────────────────────────
+  if (registered) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", padding: "24px", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+          <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "600px", height: "600px", background: "radial-gradient(circle, var(--accent3)20, transparent 70%)", borderRadius: "50%" }} />
+          <div style={{ position: "absolute", bottom: "-20%", right: "-10%", width: "500px", height: "500px", background: "radial-gradient(circle, var(--accent)15, transparent 70%)", borderRadius: "50%" }} />
+        </div>
+        <div style={{ width: "100%", maxWidth: "480px", position: "relative", animation: "fadeIn 0.5s ease", textAlign: "center" }}>
+          {/* Big animated checkmark */}
+          <div style={{ width: 96, height: 96, borderRadius: "50%", background: "linear-gradient(135deg, var(--accent3), #00bcd4)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 32px", boxShadow: "0 0 60px rgba(0,217,170,0.4)", animation: "pulse 2s ease-in-out infinite" }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+
+          <Card style={{ padding: "40px" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "28px", marginBottom: "8px", color: "var(--accent3)" }}>
+              Account Created! 🎉
+            </h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "15px", marginBottom: "24px", lineHeight: 1.6 }}>
+              Welcome to Nexus, <strong style={{ color: "var(--text)" }}>@{registered.username}</strong>!<br />
+              Your account is ready. Sign in to get started.
+            </p>
+
+            <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "16px", marginBottom: "28px", textAlign: "left" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent3)" }} />
+                <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Username</span>
+                <span style={{ marginLeft: "auto", fontSize: "13px", fontWeight: 600 }}>@{registered.username}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent)" }} />
+                <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Email</span>
+                <span style={{ marginLeft: "auto", fontSize: "13px", fontWeight: 600 }}>{registered.email}</span>
+              </div>
+            </div>
+
+            <Button fullWidth size="lg" onClick={() => switchMode("login")} icon="arrow_left">
+              Sign In to Your Account
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Normal login/register form ─────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", padding: "24px", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -660,23 +703,31 @@ function AuthPage({ onLogin }) {
               <Icon name="x" size={16} /> {error}
             </div>
           )}
-          {success && (
-            <div style={{ background: "var(--success)15", border: "1px solid var(--success)44", borderRadius: "var(--radius-sm)", padding: "12px 16px", marginBottom: "16px", color: "var(--success)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Icon name="check" size={16} /> {success}
-            </div>
-          )}
 
           {mode === "register" && (
             <Input label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="your_username" icon="user" required />
           )}
           <Input label="Email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" icon="mail" required />
-          <div style={{ marginBottom: "16px" }}>
+          <div style={{ marginBottom: "20px" }}>
             <label style={{ display: "block", marginBottom: "6px", fontSize: "13px", fontWeight: 600, color: "var(--text-muted)" }}>Password <span style={{ color: "var(--danger)" }}>*</span></label>
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", display: "flex" }}><Icon name="lock" size={16} /></span>
               <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} onKeyDown={handleKeyDown} placeholder="••••••••" style={{ paddingLeft: "40px" }} />
             </div>
-            {mode === "register" && <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "6px" }}>Must be 8+ characters with uppercase, lowercase, and a number</p>}
+            {mode === "register" && (
+              <div style={{ marginTop: "8px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {[
+                  { label: "8+ chars", ok: form.password.length >= 8 },
+                  { label: "Uppercase", ok: /[A-Z]/.test(form.password) },
+                  { label: "Lowercase", ok: /[a-z]/.test(form.password) },
+                  { label: "Number", ok: /\d/.test(form.password) },
+                ].map(req => (
+                  <span key={req.label} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "100px", background: req.ok ? "var(--accent3)22" : "var(--bg-elevated)", color: req.ok ? "var(--accent3)" : "var(--text-muted)", border: `1px solid ${req.ok ? "var(--accent3)44" : "var(--border)"}`, transition: "all 0.2s" }}>
+                    {req.ok ? "✓" : "○"} {req.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button fullWidth loading={loading} onClick={submit} size="lg">
