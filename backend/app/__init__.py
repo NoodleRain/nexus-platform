@@ -7,6 +7,9 @@ from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import logging
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from logging.handlers import RotatingFileHandler
 import os
 
@@ -24,8 +27,6 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")
 
-    import sys, os
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from config.settings import config
     app.config.from_object(config[config_name])
 
