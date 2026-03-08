@@ -36,7 +36,7 @@ def create_app(config_name=None):
     mail.init_app(app)
     limiter.init_app(app)
     CORS(app, origins=app.config["CORS_ORIGINS"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-    socketio.init_app(app, cors_allowed_origins=app.config["CORS_ORIGINS"], async_mode="threading")
+    socketio.init_app(app, cors_allowed_origins="*", async_mode="threading")
 
     from app.api.auth import auth_bp
     from app.api.users import users_bp
