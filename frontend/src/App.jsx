@@ -1133,12 +1133,14 @@ function AuthPage({ onLogin }) {
     const body = mode === "login"
       ? { email: form.email, password: form.password }
       : { username: form.username, email: form.email, password: form.password };
-
+    
     const r = await apiRequest(endpoint, { method: "POST", body: JSON.stringify(body) });
     const data = await r.json();
     setLoading(false);
-
-    if (!r.ok) { setError(data.error || "Something went wrong"); return; }
+    
+    if (r.status === 409) { setError(data.error || "Username or email already taken"); return; 
+    if (r.status === 400) { setError(data.error || "Please check your details"); return; }
+    if (!r.ok && r.status !== 201) { setError(data.error || "Something went wrong"); return; }
 
     if (mode === "login") {
       localStorage.setItem("access_token", data.access_token);
