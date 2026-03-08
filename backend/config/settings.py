@@ -20,7 +20,7 @@ class BaseConfig:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD", "")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "noreply@nexus.app")
 
-    CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:3000").split(",")
+    CORS_ORIGINS = "*"
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB upload limit
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "uploads")
