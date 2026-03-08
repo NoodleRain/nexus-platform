@@ -1,49 +1,33 @@
 import os
-from datetime import timedelta
-from dotenv import load_dotenv
 
-load_dotenv()
-
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-class BaseConfig:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt-secret")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-change-me-in-production")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
-
+    JWT_ACCESS_TOKEN_EXPIRES = 3600
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
     MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
-    MAIL_USERNAME = os.environ.get("MAIL_USERNAME", "")
-    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD", "")
-    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "noreply@nexus.app")
-
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     CORS_ORIGINS = "*"
+    APP_URL = os.environ.get("APP_URL", "http://localhost:3000")
+    ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@nexus.app")
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin1234!")
+    ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB upload limit
-    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "uploads")
-
-
-class DevelopmentConfig(BaseConfig):
+class DevelopmentConfig(Config):
     DEBUG = True
-    _default_db = "sqlite:///" + os.path.join(BASE_DIR, "database", "dev.db").replace("\\", "/")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", _default_db)
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
 
-
-class ProductionConfig(BaseConfig):
+class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///prod.db")
+    SQLALCHEMY_DATABASE_URI = db_url.replace("postgres://", "postgresql://") if db_url.startswith("postgres://") else db_url
 
-
-class TestingConfig(BaseConfig):
+class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "TEST_DATABASE_URL",
-        "postgresql://postgres:password@localhost:5432/nexus_test"
-    )
-
+    SQLALCHEMY_DATABASE_URI = "sqlite:///test.db"
 
 config = {
     "development": DevelopmentConfig,
