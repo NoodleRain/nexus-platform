@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 
-# Fix path so config module can be found
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Flask
@@ -35,7 +34,8 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
-    CORS(app, origins="*", supports_credentials=False)
+
+    CORS(app, origins="*")
     socketio.init_app(app, cors_allowed_origins="*", async_mode="threading")
 
     from app.api.auth import auth_bp
@@ -53,7 +53,6 @@ def create_app(config_name=None):
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
     app.register_blueprint(search_bp, url_prefix="/api/search")
 
-    # Health check
     @app.route("/api/health")
     def health():
         return {"status": "healthy", "version": "1.0.0"}
