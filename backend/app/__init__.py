@@ -36,7 +36,7 @@ def create_app(config_name=None):
     limiter.init_app(app)
 
     CORS(app, origins="*")
-    socketio.init_app(app, cors_allowed_origins="*", async_mode="threading")
+    socketio.init_app(app, cors_allowed_origins="*")
 
     from app.api.auth import auth_bp
     from app.api.users import users_bp
