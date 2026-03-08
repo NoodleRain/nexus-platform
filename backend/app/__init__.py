@@ -34,7 +34,6 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
-
     CORS(app, origins="*")
     socketio.init_app(app, cors_allowed_origins="*")
 
@@ -77,3 +76,4 @@ def create_app(config_name=None):
         return token is not None
 
     return app
+
